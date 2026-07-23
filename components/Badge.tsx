@@ -1,4 +1,4 @@
-import type { AgentStatus } from "@/lib/mockData";
+import type { AgentStatus } from "@/lib/types";
 
 const STATUS_LABEL: Record<AgentStatus, string> = {
   live: "LIVE",

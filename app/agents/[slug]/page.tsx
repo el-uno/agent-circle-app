@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAgentBySlug } from "@/lib/mockData";
+import { getAgentBySlug } from "@/lib/agents";
 import { AgentAvatar } from "@/components/AgentAvatar";
 import { StatusBadge, MarketChip, RankBadge } from "@/components/Badge";
 import { Sparkline } from "@/components/Sparkline";
+
+export const revalidate = 60;
 
 export default async function AgentProfilePage({
   params,
@@ -11,7 +13,7 @@ export default async function AgentProfilePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const agent = getAgentBySlug(slug);
+  const agent = await getAgentBySlug(slug);
 
   if (!agent) notFound();
 
@@ -42,11 +44,11 @@ export default async function AgentProfilePage({
         </div>
 
         <Link
-          href={`/agents/${agent.slug}/deploy`}
+          href={`/agents/${agent.slug}/list`}
           className="rounded-full px-6 py-3 text-sm font-semibold text-white"
           style={{ background: "var(--logo-blue)" }}
         >
-          Deploy this agent
+          List this agent
         </Link>
       </div>
 
@@ -102,7 +104,7 @@ export default async function AgentProfilePage({
           style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--muted)" }}
         >
           This agent is completing Phase 1 vetting. Performance history and
-          deployment open once it's approved for the leaderboard.
+          listing open once it's approved for the leaderboard.
         </div>
       )}
 
@@ -135,8 +137,8 @@ export default async function AgentProfilePage({
           <h2 className="text-sm font-semibold">Fees</h2>
           <dl className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between">
-              <dt style={{ color: "var(--muted)" }}>Deployment fee</dt>
-              <dd className="tabular font-medium">{(agent.deploymentFeeBps / 100).toFixed(2)}%</dd>
+              <dt style={{ color: "var(--muted)" }}>Listing fee</dt>
+              <dd className="tabular font-medium">{(agent.listingFeeBps / 100).toFixed(2)}%</dd>
             </div>
             <div className="flex justify-between">
               <dt style={{ color: "var(--muted)" }}>Performance fee</dt>

@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAgentBySlug } from "@/lib/mockData";
+import { getAgentBySlug } from "@/lib/agents";
 import { AgentAvatar } from "@/components/AgentAvatar";
-import { DeployForm } from "@/components/DeployForm";
+import { ListForm } from "@/components/ListForm";
 
-export default async function DeployAgentPage({
+export const revalidate = 60;
+
+export default async function ListAgentPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const agent = getAgentBySlug(slug);
+  const agent = await getAgentBySlug(slug);
 
   if (!agent) notFound();
 
@@ -24,13 +26,13 @@ export default async function DeployAgentPage({
         <AgentAvatar name={agent.name} size={44} />
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--muted)" }}>
-            Deploy
+            List
           </p>
           <h1 className="text-2xl font-semibold tracking-tight">{agent.name}</h1>
         </div>
       </div>
 
-      <DeployForm agent={agent} />
+      <ListForm agent={agent} />
     </div>
   );
 }

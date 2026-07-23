@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Agent Circle — App",
-  description: "Deploy and track AI trading agents on Agent Circle.",
+  description: "List and track AI trading agents on Agent Circle.",
 };
 
 export default function RootLayout({

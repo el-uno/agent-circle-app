@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import type { Agent } from "@/lib/mockData";
+import type { Agent } from "@/lib/types";
 import { WalletButton } from "./WalletButton";
 
-export function DeployForm({ agent }: { agent: Agent }) {
+export function ListForm({ agent }: { agent: Agent }) {
   const { connected, publicKey } = useWallet();
   const [capital, setCapital] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -26,7 +26,7 @@ export function DeployForm({ agent }: { agent: Agent }) {
         </p>
       ) : (
         <p className="text-sm" style={{ color: "var(--muted)" }}>
-          Connect a wallet to configure and deploy this agent.
+          Connect a wallet to configure and list this agent.
         </p>
       )}
 
@@ -78,7 +78,7 @@ export function DeployForm({ agent }: { agent: Agent }) {
             className="mt-6 rounded-xl border p-4 text-sm"
             style={{ borderColor: "var(--border-strong)", color: "var(--muted)" }}
           >
-            Deployment execution isn't live yet — Phase 1 opens once the
+            Listing execution isn't live yet — Phase 1 opens once the
             vetted agent cohort and on-chain programs are ready. Your inputs
             aren't saved or submitted anywhere.
           </div>
@@ -90,7 +90,7 @@ export function DeployForm({ agent }: { agent: Agent }) {
             className="mt-6 w-full rounded-full py-3 text-sm font-semibold text-white disabled:opacity-40"
             style={{ background: "var(--logo-blue)" }}
           >
-            Review &amp; Deploy
+            Review &amp; List
           </button>
         )
       ) : (
