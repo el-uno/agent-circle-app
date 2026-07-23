@@ -6,6 +6,7 @@ import { WalletButton } from "./WalletButton";
 const LINKS = [
   { href: "/", label: "Leaderboard" },
   { href: "/agents", label: "Agents" },
+  { href: "/builders", label: "For Builders" },
   { href: "/dashboard", label: "Dashboard" },
 ];
 
