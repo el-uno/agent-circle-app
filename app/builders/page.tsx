@@ -1,4 +1,5 @@
 import { SubmitAgentForm } from "@/components/SubmitAgentForm";
+import { MyAgents } from "@/components/MyAgents";
 
 const STEPS = [
   {
@@ -52,6 +53,7 @@ export default function BuildersPage() {
       </div>
 
       <SubmitAgentForm />
+      <MyAgents />
     </div>
   );
 }

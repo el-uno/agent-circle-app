@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { submitAgent } from "@/lib/submitAgent";
+import { useSiws } from "@/hooks/useSiws";
+import { submitAgentAuthed } from "@/lib/builderApi";
+import { isSessionInvalidError } from "@/lib/auth";
 import type { MarketCategory } from "@/lib/types";
 import { WalletButton } from "./WalletButton";
 
@@ -15,7 +16,7 @@ const inputStyle = {
 } as const;
 
 export function SubmitAgentForm() {
-  const { connected, publicKey } = useWallet();
+  const { connected, wallet, session, verify, verifying, error: authError, signOut } = useSiws();
   const [builderName, setBuilderName] = useState("");
   const [agentName, setAgentName] = useState("");
   const [market, setMarket] = useState<MarketCategory>("Crypto");
@@ -24,36 +25,34 @@ export function SubmitAgentForm() {
   const [errorMsg, setErrorMsg] = useState("");
   const [submittedSlug, setSubmittedSlug] = useState("");
 
-  const shortAddress = publicKey
-    ? `${publicKey.toBase58().slice(0, 4)}…${publicKey.toBase58().slice(-4)}`
-    : null;
-
+  const shortAddress = wallet ? `${wallet.slice(0, 4)}…${wallet.slice(-4)}` : null;
+  const ready = Boolean(session);
   const canSubmit =
-    connected && builderName.trim() && agentName.trim() && description.trim().length >= 20;
+    ready && builderName.trim() && agentName.trim() && description.trim().length >= 20;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmit || !publicKey || status === "loading") return;
+    if (!canSubmit || !session || status === "loading") return;
 
     setStatus("loading");
     setErrorMsg("");
 
-    const result = await submitAgent({
-      builderName,
-      builderWallet: publicKey.toBase58(),
-      agentName,
-      market,
-      description,
-    });
-
-    if (!result.ok) {
+    try {
+      const slug = await submitAgentAuthed(session.token, {
+        builderName,
+        agentName,
+        market,
+        description,
+      });
+      setSubmittedSlug(slug);
+      setStatus("done");
+      window.dispatchEvent(new CustomEvent("ac:agents-updated"));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Submission failed";
+      if (isSessionInvalidError(message)) signOut();
       setStatus("error");
-      setErrorMsg(result.error);
-      return;
+      setErrorMsg(message);
     }
-
-    setSubmittedSlug(result.slug);
-    setStatus("done");
   };
 
   if (status === "done") {
@@ -74,13 +73,27 @@ export function SubmitAgentForm() {
           as <span style={{ color: "var(--foreground)" }}>VETTING</span> and unlocks
           a public performance record once review completes.
         </p>
-        <Link
-          href={`/agents/${submittedSlug}`}
-          className="mt-6 inline-block rounded-full px-6 py-3 text-sm font-semibold"
-          style={{ background: "var(--grad-accent)", color: "#1a1608" }}
-        >
-          View your agent
-        </Link>
+        <div className="mt-6 flex justify-center gap-3">
+          <Link
+            href={`/agents/${submittedSlug}`}
+            className="inline-block rounded-full px-6 py-3 text-sm font-semibold"
+            style={{ background: "var(--grad-accent)", color: "#1a1608" }}
+          >
+            View your agent
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setStatus("idle");
+              setAgentName("");
+              setDescription("");
+            }}
+            className="rounded-full border px-6 py-3 text-sm font-semibold"
+            style={{ borderColor: "var(--border-strong)", color: "var(--muted)" }}
+          >
+            Submit another
+          </button>
+        </div>
       </div>
     );
   }
@@ -91,19 +104,45 @@ export function SubmitAgentForm() {
       className="mt-8 rounded-2xl border p-6"
       style={{ borderColor: "var(--border)", background: "var(--card)" }}
     >
-      {connected ? (
-        <p className="text-sm" style={{ color: "var(--muted)" }}>
-          Submitting as <span style={{ color: "var(--foreground)" }}>{shortAddress}</span>.
-          Your wallet becomes your builder identity.
-        </p>
-      ) : (
+      {!connected && (
         <p className="text-sm" style={{ color: "var(--muted)" }}>
           Connect a wallet to submit your agent — it becomes your builder identity
           and, later, where revenue share streams.
         </p>
       )}
 
-      <div className="mt-6 space-y-5" style={{ opacity: connected ? 1 : 0.45 }}>
+      {connected && !ready && (
+        <div>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            Connected as <span style={{ color: "var(--foreground)" }}>{shortAddress}</span>.
+            One more step: sign a message to prove you own this wallet. It costs
+            nothing and sends no transaction.
+          </p>
+          <button
+            type="button"
+            onClick={verify}
+            disabled={verifying}
+            className="mt-4 rounded-full px-6 py-3 text-sm font-semibold disabled:opacity-40"
+            style={{ background: "var(--grad-accent)", color: "#1a1608" }}
+          >
+            {verifying ? "Waiting for signature…" : "Verify wallet ownership"}
+          </button>
+          {authError && (
+            <p className="mt-3 text-sm" role="alert" style={{ color: "var(--negative)" }}>
+              {authError}
+            </p>
+          )}
+        </div>
+      )}
+
+      {ready && (
+        <p className="text-sm" style={{ color: "var(--muted)" }}>
+          Verified as <span style={{ color: "var(--foreground)" }}>{shortAddress}</span>.
+          Your wallet is your builder identity.
+        </p>
+      )}
+
+      <div className="mt-6 space-y-5" style={{ opacity: ready ? 1 : 0.45 }}>
         <div>
           <label htmlFor="builder-name" className="text-xs font-semibold" style={{ color: "var(--muted)" }}>
             Builder / team name
@@ -111,7 +150,7 @@ export function SubmitAgentForm() {
           <input
             id="builder-name"
             type="text"
-            disabled={!connected}
+            disabled={!ready}
             value={builderName}
             onChange={(e) => setBuilderName(e.target.value)}
             placeholder="e.g. 0xForge Labs"
@@ -127,7 +166,7 @@ export function SubmitAgentForm() {
           <input
             id="agent-name"
             type="text"
-            disabled={!connected}
+            disabled={!ready}
             value={agentName}
             onChange={(e) => setAgentName(e.target.value)}
             placeholder="e.g. Oracle Edge"
@@ -145,7 +184,7 @@ export function SubmitAgentForm() {
               <button
                 key={m}
                 type="button"
-                disabled={!connected}
+                disabled={!ready}
                 onClick={() => setMarket(m)}
                 className="rounded-full px-4 py-2 text-xs font-semibold transition"
                 style={
@@ -167,7 +206,7 @@ export function SubmitAgentForm() {
           </label>
           <textarea
             id="agent-description"
-            disabled={!connected}
+            disabled={!ready}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
@@ -184,7 +223,7 @@ export function SubmitAgentForm() {
         </p>
       )}
 
-      {connected ? (
+      {ready ? (
         <button
           type="submit"
           disabled={!canSubmit || status === "loading"}
@@ -193,11 +232,11 @@ export function SubmitAgentForm() {
         >
           {status === "loading" ? "Submitting…" : "Submit for vetting"}
         </button>
-      ) : (
+      ) : !connected ? (
         <div className="mt-6 flex justify-center">
           <WalletButton />
         </div>
-      )}
+      ) : null}
     </form>
   );
 }
