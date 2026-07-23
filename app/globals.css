@@ -156,3 +156,68 @@ body {
   color: transparent;
   -webkit-text-fill-color: transparent;
 }
+
+/* ——— Solana wallet adapter overrides ——— */
+.wallet-adapter-button {
+  background: var(--grad-accent) !important;
+  color: #1a1608 !important;
+  font-family: var(--font-sans), sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  height: 38px !important;
+  padding: 0 18px !important;
+  border-radius: 999px !important;
+  line-height: 1 !important;
+}
+.wallet-adapter-button:not([disabled]):hover {
+  background: var(--grad-accent) !important;
+  opacity: 0.88;
+}
+.wallet-adapter-button-trigger {
+  background: var(--grad-accent) !important;
+}
+.wallet-adapter-modal-wrapper {
+  background: var(--card-solid) !important;
+  border: 1px solid var(--border-strong);
+  border-radius: 20px !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+.wallet-adapter-modal-title {
+  color: var(--foreground) !important;
+}
+.wallet-adapter-modal-content {
+  color: var(--muted) !important;
+}
+.wallet-adapter-modal-button-close {
+  background: var(--card) !important;
+}
+.wallet-adapter-modal-overlay {
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+.wallet-adapter-modal-list .wallet-adapter-button {
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  justify-content: flex-start !important;
+}
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background: var(--background-elevated) !important;
+  opacity: 1;
+}
+.wallet-adapter-modal-list-more {
+  color: var(--muted) !important;
+}
+.wallet-adapter-dropdown-list {
+  background: var(--card-solid) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: 14px !important;
+}
+.wallet-adapter-dropdown-list-item {
+  color: var(--foreground) !important;
+  font-family: var(--font-sans), sans-serif !important;
+}
+.wallet-adapter-dropdown-list-item:not([disabled]):hover {
+  background: var(--background-elevated) !important;
+}

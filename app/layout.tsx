@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { WalletContextProvider } from "@/components/WalletContextProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,8 +33,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem={false}>
-          <Nav />
-          <main className="flex-1">{children}</main>
+          <WalletContextProvider>
+            <Nav />
+            <main className="flex-1">{children}</main>
+          </WalletContextProvider>
         </ThemeProvider>
       </body>
     </html>

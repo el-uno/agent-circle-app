@@ -1,11 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { MOCK_DEPLOYMENTS, getAgentBySlug } from "@/lib/mockData";
 import { AgentAvatar } from "@/components/AgentAvatar";
+import { WalletButton } from "@/components/WalletButton";
 
 export default function DashboardPage() {
+  const { connected, publicKey } = useWallet();
   const totalAllocated = MOCK_DEPLOYMENTS.reduce((sum, d) => sum + d.allocatedCapital, 0);
   const totalValue = MOCK_DEPLOYMENTS.reduce((sum, d) => sum + d.currentValue, 0);
   const totalPnlPct = ((totalValue - totalAllocated) / totalAllocated) * 100;
+  const shortAddress = publicKey
+    ? `${publicKey.toBase58().slice(0, 4)}…${publicKey.toBase58().slice(-4)}`
+    : null;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">
@@ -17,8 +25,33 @@ export default function DashboardPage() {
       </h1>
       <p className="mt-3 max-w-xl" style={{ color: "var(--muted)" }}>
         Track performance, exposure, and risk-limit status for every agent
-        you've deployed. Sample data shown — connect a wallet to see yours.
+        you've deployed.{" "}
+        {connected
+          ? "No live deployments yet — Phase 1 deployment opens once the on-chain programs are ready."
+          : "Sample data shown below — connect a wallet to see your own."}
       </p>
+
+      {!connected && (
+        <div
+          className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border p-5"
+          style={{ borderColor: "var(--border)", background: "var(--card)" }}
+        >
+          <p className="text-sm" style={{ color: "var(--muted)" }}>
+            Connect a wallet to check for deployments tied to your address.
+          </p>
+          <WalletButton />
+        </div>
+      )}
+
+      {connected && (
+        <div
+          className="mt-6 rounded-2xl border p-5 text-sm"
+          style={{ borderColor: "var(--border)", background: "var(--card)", color: "var(--muted)" }}
+        >
+          Connected as <span style={{ color: "var(--foreground)" }}>{shortAddress}</span>. The
+          list below is sample data illustrating what this page will show.
+        </div>
+      )}
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border p-6 accent-border" style={{ background: "var(--card)" }}>

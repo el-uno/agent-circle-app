@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ThemeToggle } from "./ThemeToggle";
+import { WalletButton } from "./WalletButton";
 
 const LINKS = [
   { href: "/", label: "Leaderboard" },
@@ -30,15 +31,7 @@ export function Nav() {
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <button
-            type="button"
-            disabled
-            title="Wallet connect coming next"
-            className="rounded-full border px-4 py-2 text-xs font-semibold"
-            style={{ borderColor: "var(--border-strong)", color: "var(--muted)" }}
-          >
-            Connect Wallet
-          </button>
+          <WalletButton />
         </div>
       </div>
     </header>
